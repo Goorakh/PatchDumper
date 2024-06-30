@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BuildDir>$(SolutionDir)build/</BuildDir>
+    <TSPackageDir>$(BuildDir)/package/</TSPackageDir>
+    <TSPackagePatchersDir>$(TSPackageDir)/patchers/$(SolutionName)/</TSPackagePatchersDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+  </ItemGroup>
+
+  <Target Name="BuildTSPackage" AfterTargets="Build">
+    <MakeDir Directories="$(TSPackagePatchersDir)" />
+    
+    <Copy SourceFiles="$(OutDir)$(AssemblyName).dll" DestinationFolder="$(TSPackagePatchersDir)" />
+    
+    <Copy SourceFiles="$(OutDir)$(AssemblyName).pdb" DestinationFolder="$(TSPackagePatchersDir)" Condition="'$(Configuration)'=='Debug'" ContinueOnError="true" />
+    <Delete Files="$(TSPackagePluginDir)/$(AssemblyName).dll.pdb" Condition="'$(Configuration)'!='Debug'" ContinueOnError="true" />
+  </Target>
+</Project>
