@@ -58,9 +58,9 @@ namespace PatchDumperPatcher
             }
         }
 
-        internal NativeDetourInfo(IDetour detour, IntPtr from, IntPtr to, Assembly owner) : base(detour, null, null, owner)
+        internal NativeDetourInfo(NativeDetour detour, IntPtr from, IntPtr to, Assembly owner) : base(detour, null, null, owner)
         {
-            _nativeDetour = (NativeDetour)detour;
+            _nativeDetour = detour;
             _pinned = (HashSet<MethodBase>)NativeDetour_Pinned_FI.GetValue(_nativeDetour);
 
             _fromPtr = from;
