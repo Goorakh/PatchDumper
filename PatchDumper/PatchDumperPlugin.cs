@@ -1,12 +1,10 @@
 using BepInEx;
 using HarmonyLib;
-using HarmonyLib.Public.Patching;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
-using PatchDumper.Content;
 using PatchDumperPatcher;
 using RoR2;
 using System;
@@ -30,8 +28,6 @@ namespace PatchDumper
 
         internal static PatchDumperPlugin Instance { get; private set; }
 
-        internal ContentPackProvider ContentPackProvider { get; private set; }
-
         void Awake()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -39,11 +35,6 @@ namespace PatchDumper
             Log.Init(Logger);
 
             Instance = SingletonHelper.Assign(Instance, this);
-
-            ContentPackProvider = new ContentPackProvider();
-            ContentPackProvider.Register();
-
-            LanguageFolderHandler.Register(System.IO.Path.GetDirectoryName(Info.Location));
 
             stopwatch.Stop();
             Log.Info_NoCallerPrefix($"Initialized in {stopwatch.Elapsed.TotalSeconds:F2} seconds");
