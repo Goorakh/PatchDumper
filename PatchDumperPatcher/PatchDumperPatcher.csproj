@@ -22,6 +22,6 @@
     <Copy SourceFiles="$(OutDir)$(AssemblyName).dll" DestinationFolder="$(TSPackagePatchersDir)" />
     
     <Copy SourceFiles="$(OutDir)$(AssemblyName).pdb" DestinationFolder="$(TSPackagePatchersDir)" Condition="'$(Configuration)'=='Debug'" ContinueOnError="true" />
-    <Delete Files="$(TSPackagePluginDir)/$(AssemblyName).dll.pdb" Condition="'$(Configuration)'!='Debug'" ContinueOnError="true" />
+    <Delete Files="$(TSPackagePatchersDir)/$(AssemblyName).pdb" Condition="'$(Configuration)'!='Debug'" ContinueOnError="true" />
   </Target>
 </Project>
