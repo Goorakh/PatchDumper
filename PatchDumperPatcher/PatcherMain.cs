@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.RuntimeDetour.HookGen;
