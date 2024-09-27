@@ -16,6 +16,13 @@
     <PackageReference Include="BepInEx.Core" Version="5.4.21" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include=" Krafs.Publicizer" Version="*" PrivateAssets="all" />
+
+    <!-- Publicize by assembly name -->
+    <Publicize Include="MonoMod.RuntimeDetour" />
+  </ItemGroup>
+
   <Target Name="BuildTSPackage" AfterTargets="Build">
     <MakeDir Directories="$(TSPackagePatchersDir)" />
     
