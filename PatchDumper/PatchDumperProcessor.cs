@@ -21,7 +21,7 @@ namespace PatchDumper
         readonly TypeReference _voidTypeRef;
         readonly TypeReference _stringTypeRef;
 
-        MethodDefinition _patchInfoAttributeConstructor;
+        readonly MethodDefinition _patchInfoAttributeConstructor;
 
         readonly Dictionary<Type, TypeDefinition> _cachedContainerTypes = [];
 
@@ -34,11 +34,6 @@ namespace PatchDumper
             _voidTypeRef = mainModule.ImportReference(typeof(void));
             _stringTypeRef = mainModule.ImportReference(typeof(string));
 
-            initializeAssembly();
-        }
-
-        void initializeAssembly()
-        {
             TypeDefinition patchInfoAttribute = new TypeDefinition("", "PatchInfoAttribute", Mono.Cecil.TypeAttributes.NotPublic | Mono.Cecil.TypeAttributes.Sealed | Mono.Cecil.TypeAttributes.BeforeFieldInit, _attributeTypeRef);
 
             _patchInfoAttributeConstructor = new MethodDefinition(".ctor", Mono.Cecil.MethodAttributes.FamANDAssem | Mono.Cecil.MethodAttributes.Family | Mono.Cecil.MethodAttributes.HideBySig | Mono.Cecil.MethodAttributes.SpecialName | Mono.Cecil.MethodAttributes.RTSpecialName, _voidTypeRef);
@@ -69,14 +64,16 @@ namespace PatchDumper
                 typeName = typeName.Remove(backtickIndex);
             }
 
-            TypeDefinition containerType;
+            const Mono.Cecil.TypeAttributes CONTAINER_TYPE_ATTRIBUTES = Mono.Cecil.TypeAttributes.Public | Mono.Cecil.TypeAttributes.Sealed | Mono.Cecil.TypeAttributes.Abstract;
 
             Type declaringType = type.DeclaringType;
+
+            TypeDefinition containerType;
             if (declaringType != null)
             {
                 TypeDefinition declaringTypeContainer = getOrCreateContainerType(declaringType);
 
-                containerType = new TypeDefinition("", typeName, Mono.Cecil.TypeAttributes.Public | Mono.Cecil.TypeAttributes.Sealed | Mono.Cecil.TypeAttributes.Abstract);
+                containerType = new TypeDefinition("", typeName, CONTAINER_TYPE_ATTRIBUTES);
 
                 declaringTypeContainer.NestedTypes.Add(containerType);
             }
@@ -94,7 +91,7 @@ namespace PatchDumper
                     containerNamespace = $"{HOOK_CONTAINER_ROOT_NAMESPACE}.{containerNamespace}";
                 }
 
-                containerType = new TypeDefinition(containerNamespace, typeName, Mono.Cecil.TypeAttributes.Public | Mono.Cecil.TypeAttributes.Sealed | Mono.Cecil.TypeAttributes.Abstract);
+                containerType = new TypeDefinition(containerNamespace, typeName, CONTAINER_TYPE_ATTRIBUTES);
 
                 OutputAssembly.MainModule.Types.Add(containerType);
             }
@@ -216,6 +213,12 @@ namespace PatchDumper
         {
             void addAttribute(string type, string owner)
             {
+                if (string.IsNullOrEmpty(type))
+                    type = string.Empty;
+
+                if (string.IsNullOrEmpty(owner))
+                    owner = string.Empty;
+
                 CustomAttribute attribute = new CustomAttribute(_patchInfoAttributeConstructor);
                 attribute.ConstructorArguments.Add(new CustomAttributeArgument(_stringTypeRef, type));
                 attribute.ConstructorArguments.Add(new CustomAttributeArgument(_stringTypeRef, owner));
