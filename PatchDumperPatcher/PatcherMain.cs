@@ -113,7 +113,7 @@ namespace PatchDumperPatcher
 
         static bool registerILHook(ILHook hook, MethodBase method, ILContext.Manipulator manipulator)
         {
-            registerDetourInfo(new BaseDetourInfo(hook, method, null, findHookOwner()));
+            registerDetourInfo(new BaseDetourInfo(hook, method, manipulator.Method, findHookOwner()));
             return true;
         }
 

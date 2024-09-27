@@ -96,6 +96,13 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include=" Krafs.Publicizer" Version="*" PrivateAssets="all" />
+
+    <!-- Publicize by assembly name -->
+    <Publicize Include="MonoMod.RuntimeDetour" />
+  </ItemGroup>
+
   <Target Name="BuildTSPackage" AfterTargets="Build">
     <MakeDir Directories="$(TSPackageDir);$(TSPackagePluginDir)" />
     <Copy SourceFiles="$(SolutionDir)manifest.json;$(SolutionDir)README.md;$(SolutionDir)CHANGELOG.md" DestinationFolder="$(TSPackageDir)" />
