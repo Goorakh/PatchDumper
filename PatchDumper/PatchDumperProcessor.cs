@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
@@ -166,6 +167,8 @@ namespace PatchDumper
             if (ilHookDetourInfos.Count <= 0)
                 return;
 
+            Log.Info($"Dumping IL hooks for {method.FullDescription()}:");
+
             TypeDefinition containerType = getOrCreateContainerType(method.DeclaringType);
 
             using DynamicMethodDefinition dmd = new DynamicMethodDefinition(method);
@@ -175,10 +178,12 @@ namespace PatchDumper
             methodDefinition.CustomAttributes.Clear();
 
             IILReferenceBag referenceBag = new RuntimeILReferenceBag();
-
+            
             foreach (BaseDetourInfo detourInfo in ilHookDetourInfos)
             {
                 ILHook ilHook = (ILHook)detourInfo.Detour;
+
+                Log.Info($"    - Applying manipulator {ilHook.Manipulator.Method.FullDescription()}");
 
                 using ILContext context = new ILContext(methodDefinition);
                 context.ReferenceBag = referenceBag;
@@ -306,9 +311,14 @@ namespace PatchDumper
 
             foreach (Instruction instruction in method.Body.Instructions)
             {
-                if (instruction.Operand is IMetadataTokenProvider metadataTokenProvider)
+                switch (instruction.Operand)
                 {
-                    instruction.Operand = OutputAssembly.MainModule.ImportReference(metadataTokenProvider);
+                    case IMetadataTokenProvider metadataTokenProvider:
+                        instruction.Operand = OutputAssembly.MainModule.ImportReference(metadataTokenProvider);
+                        break;
+                    case MethodBase methodInfo when methodInfo.DeclaringType != null:
+                        instruction.Operand = OutputAssembly.MainModule.ImportReference(methodInfo);
+                        break;
                 }
             }
         }
@@ -337,6 +347,55 @@ namespace PatchDumper
                 if (detourIndex != i)
                 {
                     (detourInfos[i], detourInfos[detourIndex]) = (detourInfos[detourIndex], detourInfos[i]);
+                }
+            }
+        }
+
+        public void Validate()
+        {
+            foreach (ModuleDefinition module in OutputAssembly.Modules)
+            {
+                List<TypeDefinition> invalidTypes = [];
+
+                foreach (TypeDefinition type in module.GetAllTypes())
+                {
+                    List<MethodDefinition> invalidMethods = [];
+
+                    foreach (MethodDefinition method in type.Methods)
+                    {
+                        bool methodInvalid = false;
+                        
+                        foreach (Instruction instruction in method.Body.Instructions)
+                        {
+                            if (instruction.OpCode.FlowControl == FlowControl.Call)
+                            {
+                                if (instruction.Operand is not IMethodSignature)
+                                {
+                                    Log.Error($"Invalid call operand {instruction.Operand} ({instruction.Operand?.GetType()?.FullName ?? "null"}) at {instruction.Offset:X4} in {method.FullName}");
+                                    methodInvalid = true;
+                                }
+                            }
+
+                            if (instruction.Operand is IMemberDefinition memberDefinition)
+                            {
+                                if (memberDefinition.DeclaringType == null)
+                                {
+                                    Log.Error($"Invalid member reference in method {method.FullName} at {instruction.Offset:X4} ({memberDefinition})");
+                                    methodInvalid = true;
+                                }
+                            }
+                        }
+
+                        if (methodInvalid)
+                        {
+                            invalidMethods.Add(method);
+                        }
+                    }
+
+                    foreach (MethodDefinition method in invalidMethods)
+                    {
+                        type.Methods.Remove(method);
+                    }
                 }
             }
         }

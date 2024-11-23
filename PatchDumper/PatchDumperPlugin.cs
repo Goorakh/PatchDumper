@@ -55,6 +55,8 @@ namespace PatchDumper
                 patchProcessor.AddDetours(kvp.Key, kvp.Value);
             }
 
+            patchProcessor.Validate();
+
             patchProcessor.OutputAssembly.Write(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Instance.Info.Location), "Hooks.dll"));
         }
     }
