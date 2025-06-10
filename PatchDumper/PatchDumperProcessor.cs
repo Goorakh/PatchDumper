@@ -376,6 +376,21 @@ namespace PatchDumper
                                 }
                             }
 
+                            switch (instruction.OpCode.OperandType)
+                            {
+                                case OperandType.InlineField:
+                                case OperandType.InlineMethod:
+                                case OperandType.InlineTok:
+                                case OperandType.InlineType:
+                                    if (instruction.Operand is not IMetadataTokenProvider)
+                                    {
+                                        Log.Error($"Invalid {instruction.OpCode.OperandType} ({instruction.OpCode.Name}) operand {instruction.Operand} ({instruction.Operand?.GetType()?.FullName ?? "null"}) at {instruction.Offset:X4} in {method.FullName}");
+                                        methodInvalid = true;
+                                    }
+
+                                    break;
+                            }
+
                             if (instruction.Operand is IMemberDefinition memberDefinition)
                             {
                                 if (memberDefinition.DeclaringType == null)
