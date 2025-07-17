@@ -369,6 +369,19 @@ namespace PatchDumper
                         {
                             if (instruction.OpCode.FlowControl == FlowControl.Call)
                             {
+                                if (instruction.Operand is MethodBase methodOperand)
+                                {
+                                    try
+                                    {
+                                        instruction.Operand = module.ImportReference(methodOperand);
+                                        Log.Info($"Converted invalid call operand {methodOperand.FullDescription()} to {instruction.Operand} at {instruction.Offset:X4} in {method.FullName}");
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Log.Error($"Failed to convert invalid call operand {methodOperand.FullDescription()} at {instruction.Offset:X4} in {method.FullName}: {e}");
+                                    }
+                                }
+
                                 if (instruction.Operand is not IMethodSignature)
                                 {
                                     Log.Error($"Invalid call operand {instruction.Operand} ({instruction.Operand?.GetType()?.FullName ?? "null"}) at {instruction.Offset:X4} in {method.FullName}");
@@ -382,6 +395,48 @@ namespace PatchDumper
                                 case OperandType.InlineMethod:
                                 case OperandType.InlineTok:
                                 case OperandType.InlineType:
+
+                                    if (instruction.Operand is FieldInfo fieldOperand)
+                                    {
+                                        try
+                                        {
+                                            instruction.Operand = module.ImportReference(fieldOperand);
+                                            Log.Info($"Converted invalid inline field operand {fieldOperand.DeclaringType.FullName}.{fieldOperand.Name} to {instruction.Operand} at {instruction.Offset:X4} in {method.FullName}");
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Log.Error($"Failed to convert invalid inline field operand {fieldOperand.DeclaringType.FullName}.{fieldOperand.Name} at {instruction.Offset:X4} in {method.FullName}: {e}");
+                                        }
+                                    }
+                                    else if (instruction.Operand is MethodBase methodOperand)
+                                    {
+                                        try
+                                        {
+                                            instruction.Operand = module.ImportReference(methodOperand);
+                                            Log.Info($"Converted invalid inline method operand {methodOperand.FullDescription()} to {instruction.Operand} at {instruction.Offset:X4} in {method.FullName}");
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Log.Error($"Failed to convert invalid inline method operand {methodOperand.FullDescription()} at {instruction.Offset:X4} in {method.FullName}: {e}");
+                                        }
+                                    }
+                                    else if (instruction.Operand is Type typeOperand)
+                                    {
+                                        try
+                                        {
+                                            instruction.Operand = module.ImportReference(typeOperand);
+                                            Log.Info($"Converted invalid inline type operand {typeOperand.FullDescription()} to {instruction.Operand} at {instruction.Offset:X4} in {method.FullName}");
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Log.Error($"Failed to convert invalid inline type operand {typeOperand.FullDescription()} at {instruction.Offset:X4} in {method.FullName}: {e}");
+                                        }
+                                    }
+                                    else if (instruction.Operand is not IMetadataTokenProvider)
+                                    {
+                                        Log.Debug($"Unknown inline operand {instruction.Operand} ({instruction.Operand?.GetType().FullName}) at {instruction.Offset:X4} in {method.FullName}");
+                                    }
+
                                     if (instruction.Operand is not IMetadataTokenProvider)
                                     {
                                         Log.Error($"Invalid {instruction.OpCode.OperandType} ({instruction.OpCode.Name}) operand {instruction.Operand} ({instruction.Operand?.GetType()?.FullName ?? "null"}) at {instruction.Offset:X4} in {method.FullName}");

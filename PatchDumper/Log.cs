@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace PatchDumper
@@ -25,10 +26,11 @@ namespace PatchDumper
             return $"{callerPath}:{callerLineNumber} ({callerMemberName}) ";
         }
 
-#if DEBUG
+        [Conditional("DEBUG")]
         internal static void Debug(object data, [CallerFilePath] string callerPath = "", [CallerMemberName] string callerMemberName = "", [CallerLineNumber] int callerLineNumber = -1) => _logSource.LogDebug(getLogPrefix(callerPath, callerMemberName, callerLineNumber) + data);
+
+        [Conditional("DEBUG")]
         internal static void Debug_NoCallerPrefix(object data) => _logSource.LogDebug(data);
-#endif
 
         internal static void Error(object data, [CallerFilePath] string callerPath = "", [CallerMemberName] string callerMemberName = "", [CallerLineNumber] int callerLineNumber = -1) => _logSource.LogError(getLogPrefix(callerPath, callerMemberName, callerLineNumber) + data);
         internal static void Error_NoCallerPrefix(object data) => _logSource.LogError(data);
