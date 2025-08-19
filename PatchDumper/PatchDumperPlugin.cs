@@ -50,9 +50,9 @@ namespace PatchDumper
             }
 
             PatchDumperProcessor patchProcessor = new PatchDumperProcessor(asm);
-            foreach (KeyValuePair<MethodBase, List<BaseDetourInfo>> kvp in PatcherMain.ActiveDetoursMap)
+            foreach ((MethodBase patchedMethod, List<BaseDetourInfo> detours) in PatcherMain.ActiveDetoursMap)
             {
-                patchProcessor.AddDetours(kvp.Key, kvp.Value);
+                patchProcessor.AddDetours(patchedMethod, detours);
             }
 
             patchProcessor.Validate();
