@@ -2,8 +2,8 @@
 	"name": "PatchDumper",
 	"authorName": "Gorakh",
 	"version_number": "1.0.0",
-	"website_url": "",
-	"description": "",
+	"website_url": "https://github.com/Goorakh/PatchDumper",
+	"description": "Debugging tool for developers to inspect runtime patches.",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.2113"
 	]

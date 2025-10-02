@@ -147,13 +147,11 @@ namespace PatchDumper
 
             addILHookMethods(method, ilHookDetourInfos);
 
-#if DEBUG
-            Log.Debug_NoCallerPrefix($"{method.FullDescription()} detours:");
+            Log.Info_NoCallerPrefix($"{method.FullDescription()} detours:");
             foreach (BaseDetourInfo detour in detours)
             {
-                Log.Debug_NoCallerPrefix($"    {detour.Detour.GetType().Name}: {detour.To?.FullDescription()}");
+                Log.Info_NoCallerPrefix($"    {detour.Detour.GetType().Name}: {detour.To?.FullDescription()}");
             }
-#endif
         }
 
         void addILHookMethods(MethodBase method, List<BaseDetourInfo> ilHookDetourInfos)
@@ -434,7 +432,7 @@ namespace PatchDumper
                                     }
                                     else if (instruction.Operand is not IMetadataTokenProvider)
                                     {
-                                        Log.Debug($"Unknown inline operand {instruction.Operand} ({instruction.Operand?.GetType().FullName}) at {instruction.Offset:X4} in {method.FullName}");
+                                        Log.Warning($"Unknown inline operand {instruction.Operand} ({instruction.Operand?.GetType()?.FullName}) at {instruction.Offset:X4} in {method.FullName}");
                                     }
 
                                     if (instruction.Operand is not IMetadataTokenProvider)
